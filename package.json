@@ -1,0 +1,24 @@
+{
+  "name": "openshift-generator",
+  "version": "1.0.0",
+  "description": "## Source * https://yeoman.io/",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kiversen/openshift-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kiversen/openshift-generator/issues"
+  },
+  "homepage": "https://github.com/kiversen/openshift-generator#readme",
+  "dependencies": {
+    "fs-extra": "^10.1.0",
+    "yeoman-generator": "^5.7.0"
+  }
+}
