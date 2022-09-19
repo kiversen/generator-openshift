@@ -11,5 +11,6 @@
 
 ## Steps
 
-1. npm init -y (generere package.json)
-2. npm install fs-extra yeoman-generator --save 
+1. Opprett et prosjekt og prefikses alltid med **generator-**<din-nye-generator-navn>
+2. npm init -y (generere package.json)
+3. npm install fs-extra yeoman-generator --save 
