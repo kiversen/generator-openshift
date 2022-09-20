@@ -5,106 +5,261 @@ module.exports = class extends Generator {
   initializing() {
       this.log('working');
       this.props = {};
-      this.pkgs = {
-          defaultPkgs: [
-              'dotenv'
-          ],
-          expPkgs: [
-            'body-parser',
-            'cookie-parser',
-            'cookie-session',
-          ],
-          restPkgs: [
-              'restify',
-              'jsonwebtoken',
-              'jwtdecode',
-              'node-cache',
-          ],
-          defaultDevPkgs: [
-              'madge'
-          ],
-          expDevPkgs: [
-
-          ],
-          restDevPkgs: []
-      };
   }
 
-  async prompting() {
-      const props = await this.prompt([
-          {
-              type: 'input',
-              name: 'name',
-              message: 'What is your applications name'
-          },
-          {
-              type: 'input',
-              name: 'description',
-              message: 'Please enter a description of your project:'
-          },
-          {
-              type: 'input',
-              name: 'fullname',
-              message: 'Please enter your name:'
-          },
-          {
-              type: 'input',
-              name: 'email',
-              message: 'Please enter your email address:'
-          },
-          {
-              type: 'input',
-              name: 'repo',
-              message: 'Please enter the url for the Github repository:'
-          },
-          {
-              type: 'list',
-              name: 'stack',
-              choices: ['nodejs', 'angular'],
-              message: 'Which tech stack are you using?'
-          },
-          {
-              type: 'list',
-              name: 'app',
-              choices: ['package','express web app','restify API'],
-              message: 'What type of application are you building?'
-          }
-      ]);
-      this.props.name = props.name;
-      this.props.description = props.description;
-      this.props.fullname = props.fullname;
-      this.props.email = props.email;
-      this.props.repo = props.repo;
-      this.props.stack = props.stack;
-      this.props.app = props.app;
-  }
-  async configuration() {
-      this.log('Started copying files...');
-      try {
-          await fs.copy(`${this.sourceRoot()}`, `${this.destinationRoot()}`);
-      } catch (e) {
-          this.log(e);
-      }
-  }
-  writing() {
-    this.log('writing');
-    const pkg = require('../../package.json');
-    pkg.name = this.props.name;
-    pkg.version = this.props.version;
-    pkg.description = this.props.description;
-    pkg.files = undefined;
-    pkg.keywords = undefined;
+    async prompting() {
+        const props = await this.prompt([
+            {
+                type: 'input',
+                name: 'namespace',
+                message: 'Namespace?'
+            },{
+                type: 'input',
+                name: 'serviceaccountname',
+                message: 'ServiceAccount:'
+            },
+            {
+                type: 'input',
+                name: 'ssh_secret_name',
+                message: '[GIT] Navn på git clone ssh secret?'
+            },
+            {
+                type: 'input',
+                name: 'base64encoded_private_key',
+                message: '[PRIVATE SSH] Base64 encoded ssh key:'
+            },
+            {
+                type: 'input',
+                name: 'jenkins_username',
+                message: '[JENKINS] Username:'
+            },
+            {
+                type: 'input',
+                name: 'jenkins_password',
+                message: '[JENKINS] Password:'
+            },
+            {
+                type: 'input',
+                name: 'sonar_access_token',
+                message: '[SONAR] Sonar access token:'
+            },
+            {
+                type: 'input',
+                name: 'trigger_serviceaccountname',
+                message: '[TRIGGER] ServiceAccount:'
+            },
+            {
+                type: 'input',
+                name: 'trigger_secret_name',
+                message: '[TRIGGER] Webhook secret name:'
+            },
+            {
+                type: 'input',
+                name: 'webhook_secret_token_plain_text',
+                message: '[TRIGGER] Webhook secret token (plain text):'
+            },
+            {
+                type: 'list',
+                name: 'host',
+                choices: ['apps.dev.ocp.toll.no','apps.sandbox.ocp.toll.no'],
+                message: '[TRIGGER] Host:'
+            },
+            {
+                type: 'input',
+                name: 'applicationpath',
+                message: '[TRIGGER] Application path (path/to/application/):'
+            },
+            {
+                type: 'input',
+                name: 'applicationname',
+                message: '[TRIGGER] Application name:'
+            },
+            {
+                type: 'list',
+                name: 'javabuilderimage',
+                choices: ['java8','java11','java17'],
+                message: 'Select java builder:'
+            }
 
-    this.fs.writeJSON(this.destinationPath('package.json'), pkg);
-    this.log('Finished writing package.json file');
 
-  }
-  install() {
-      this.log('writing ');
-      const pkgs = this.pkgs.defaultPkgs;
+            ]);
 
+        this.props.serviceaccountname = props.serviceaccountname;
+        this.props.namespace = props.namespace;
+        this.props.ssh_secret_name = props.ssh_secret_name;
+        this.props.base64encoded_private_key = props.base64encoded_private_key;
+        this.props.jenkins_username = props.jenkins_username;
+        this.props.jenkins_password = props.jenkins_password;
+        this.props.sonar_access_token = props.sonar_access_token;
+
+        this.props.applicationname = props.applicationname;
+        this.props.applicationpath = props.applicationpath;
+        this.props.javabuilderimage = props.javabuilderimage;
+        this.props.host = props.host;
+        this.props.trigger_serviceaccountname = props.trigger_serviceaccountname;
+        this.props.webhook_secret_token_plain_text = props.webhook_secret_token_plain_text;
+        this.props.trigger_secret_name = props.trigger_secret_name;
   }
-  end() {
-      this.log('Happy coding');
-  }
+
+
+    writing_service_account() {
+        this.log('writing');
+        this.log(`Service account name: ${this.props.serviceaccountname}`);
+        this.log(`Namespace: ${this.props.namespace}`);
+
+        this.fs.copyTpl(
+            this.templatePath('./pipeline/ServiceAccount.yaml'),
+            this.destinationPath(`openshift/pipeline/${this.props.namespace}-ServiceAccount.yaml`),
+            {
+                serviceaccountname: this.props.serviceaccountname,
+                namespace: this.props.namespace,
+                ssh_secret_name: this.props.ssh_secret_name
+            });
+
+
+        //const sa = require('./templates/pipeline/serviceaccount.yaml');
+        //sa.name = this.props.name;
+        //sa.namespace = this.props.namespace;
+
+        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
+        this.log('Finished writing yaml files');
+   }
+
+    writing_bitbucket_ssh_secret() {
+        this.fs.copyTpl(
+            this.templatePath('./pipeline/bitbucket-ssh-Secret.yaml'),
+            this.destinationPath(`openshift/pipeline/${this.props.namespace}-git-ssh-Secret.yaml`),
+            {
+                ssh_secret_name: this.props.ssh_secret_name,
+                namespace: this.props.namespace,
+                base64encoded_private_key: this.props.base64encoded_private_key
+            });
+
+
+        //const sa = require('./templates/pipeline/serviceaccount.yaml');
+        //sa.name = this.props.name;
+        //sa.namespace = this.props.namespace;
+
+        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
+        this.log('Finished writing yaml files');
+    }
+
+    writing_create_settings_xml_script() {
+        this.fs.copyTpl(
+            this.templatePath('./pipeline/create-settings-xml-secret.sh'),
+            this.destinationPath(`openshift/pipeline/${this.props.namespace}-create-settings-xml-Script.sh`),
+            {
+                namespace: this.props.namespace,
+            });
+
+
+        //const sa = require('./templates/pipeline/serviceaccount.yaml');
+        //sa.name = this.props.name;
+        //sa.namespace = this.props.namespace;
+
+        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
+        this.log('Finished writing yaml files');
+    }
+
+    writing_granting_imagebuilding_access_to_service_account_script() {
+        this.fs.copyTpl(
+            this.templatePath('./pipeline/grant-access-to-service-account.sh'),
+            this.destinationPath(`openshift/pipeline/${this.props.namespace}-grant-access-to-service-account-Script.sh`),
+            {
+                serviceaccountname: this.props.serviceaccountname,
+            });
+
+
+        //const sa = require('./templates/pipeline/serviceaccount.yaml');
+        //sa.name = this.props.name;
+        //sa.namespace = this.props.namespace;
+
+        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
+        this.log('Finished writing yaml files');
+    }
+
+    writing_create_settings_xml_file() {
+        this.fs.copyTpl(
+            this.templatePath('./pipeline/settings.xml'),
+            this.destinationPath(`openshift/pipeline/${this.props.namespace}-settings.xml`),
+            {
+                jenkins_username: this.props.jenkins_username,
+                jenkins_password: this.props.jenkins_password,
+                sonar_access_token: this.props.sonar_access_token
+            });
+
+
+        //const sa = require('./templates/pipeline/serviceaccount.yaml');
+        //sa.name = this.props.name;
+        //sa.namespace = this.props.namespace;
+
+        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
+        this.log('Finished writing yaml files');
+    }
+
+    writing_docker_config_json_file() {
+        this.fs.copyTpl(
+            this.templatePath('./pipeline/registry-config.json'),
+            this.destinationPath(`openshift/pipeline/${this.props.namespace}-registry-config.json`)
+        );
+
+
+        //const sa = require('./templates/pipeline/serviceaccount.yaml');
+        //sa.name = this.props.name;
+        //sa.namespace = this.props.namespace;
+
+        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
+        this.log('Finished writing yaml files');
+    }
+
+    writing_trigger_files() {
+        this.fs.copyTpl(
+            this.templatePath('./trigger/Route.yaml'),
+            this.destinationPath(`openshift/trigger/${this.props.applicationname}-Route.yaml`),
+            {
+                applicationname: this.props.applicationname,
+                namespace: this.props.namespace,
+                host: this.props.host,
+                applicationpath: this.props.applicationpath
+            });
+
+        this.fs.copyTpl(
+            this.templatePath('./trigger/RoleBinding.yaml'),
+            this.destinationPath(`openshift/trigger/${this.props.applicationname}-RoleBinding.yaml`),
+            {
+                applicationname: this.props.applicationname,
+                namespace: this.props.namespace,
+                trigger_serviceaccountname: this.props.trigger_serviceaccountname
+            });
+
+        this.fs.copyTpl(
+            this.templatePath('./trigger/EventListener.yaml'),
+            this.destinationPath(`openshift/trigger/${this.props.applicationname}-EventListener.yaml`),
+            {
+                applicationname: this.props.applicationname,
+                namespace: this.props.namespace,
+                trigger_serviceaccountname: this.props.trigger_serviceaccountname,
+                trigger_secret_name: this.props.trigger_secret_name
+            });
+
+        this.fs.copyTpl(
+            this.templatePath('./trigger/trigger-Template.yaml'),
+            this.destinationPath(`openshift/trigger/${this.props.applicationname}-TriggerTemplate.yaml`),
+            {
+                applicationname: this.props.applicationname,
+                namespace: this.props.namespace,
+                serviceaccountname: this.props.serviceaccountname,
+                javabuilderimage: this.props.javabuilderimage
+            });
+
+
+
+
+        //const sa = require('./templates/pipeline/serviceaccount.yaml');
+        //sa.name = this.props.name;
+        //sa.namespace = this.props.namespace;
+
+        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
+        this.log('Finished writing yaml files');
+    }
 };

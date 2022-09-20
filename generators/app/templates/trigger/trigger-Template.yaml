@@ -1,0 +1,55 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: <%= applicationname %>-triggertemplate
+  namespace: <%= namespace %>
+spec:
+  params:
+    - name: git-branch
+    - name: git-revision
+    - name: git-repository-url
+    - name: git-committer
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: <%= applicationname %>-test-
+      spec:
+        podTemplate:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          volumes:
+            - name: maven-settings
+              secret:
+                secretName: <%= namespace %>-maven-settings.xml
+            - name: registry-auth-config
+              secret:
+                secretName: <%= namespace %>-registry-config.json
+        serviceAccountName: <%= serviceaccountname %>
+        pipelineRef:
+          name: s2i-maven
+        params:
+          - name: git-branch
+            value: $(tt.params.git-branch)
+          - name: git-revision
+            value: $(tt.params.git-revision)
+          - name: git-url
+            value: $(tt.params.git-repository-url)
+          - name: git-committer
+            value: $(tt.params.git-committer)
+          - name: maven-image
+            value: registry.repo.toll.no/build-images/builder-maven-<%= javabuilderimage %>
+          - name: image-name
+            value: 'registry.repo.toll.no/<%= namespace %>/<%= applicationname %>'
+          - name: image-env-tag
+            value: 'test'
+        workspaces:
+          - name: shared-workspace
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 3Gi

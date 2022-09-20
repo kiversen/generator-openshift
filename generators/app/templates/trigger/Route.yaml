@@ -1,0 +1,22 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: <%= applicationname %>
+  namespace: <%= namespace %>
+  labels:
+    app.kubernetes.io/managed-by: EventListener
+    app.kubernetes.io/part-of: Triggers
+    eventlistener: bitbucket-listener
+spec:
+  host: <%= namespace %>-pipelines.<%= host %>
+  port:
+    targetPort: 8080
+  path: <%= applicationpath %>
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: el-<%= applicationname %>
+    weight: 100
+  wildcardPolicy: None

@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: <%= applicationname %>
+subjects:
+  - kind: ServiceAccount
+    name: <%= trigger_serviceaccountname %>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-triggers-eventlistener-roles
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: <%= applicationname %>
+subjects:
+  - kind: ServiceAccount
+    name: <%= trigger_serviceaccountname %>
+    namespace: <%= namespace %>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-triggers-eventlistener-clusterroles

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <servers>
+        <server>
+            <id>tolletaten</id>
+            <username><%= jenkins_username %></username>
+            <password><%= jenkins_password %></password>
+        </server>
+    </servers>
+    <profiles>
+        <profile>
+            <id>sonar</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <sonar.host.url>https://msutv57.toll.intern.toll.no</sonar.host.url>
+                <sonar.login><%= sonar_access_token %></sonar.login>
+            </properties>
+        </profile>
+    </profiles>
+</settings>

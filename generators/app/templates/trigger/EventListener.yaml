@@ -1,0 +1,30 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: <%= applicationname %>
+  namespace: <%= namespace %>
+spec:
+  serviceAccountName: <%= trigger_serviceaccountname %>
+  triggers:
+    - name: <%= applicationname %>
+      interceptors:
+        - ref:
+            name: "bitbucket"
+            kind: ClusterInterceptor
+          params:
+            - name: "secretRef"
+              value:
+                secretName: <%= trigger_secret_name %>
+                secretKey: secretToken
+            - name: "eventTypes"
+              value: ["repo:refs_changed"]
+        - ref:
+            name: "cel"
+          params:
+            - name: "filter"
+              value: body.changes[0].refId == 'refs/heads/release/test'
+      bindings:
+        - ref: pipeline-trigger-clusterbinding
+          kind: ClusterTriggerBinding
+      template:
+        ref: <%= applicationname %>-triggertemplate
