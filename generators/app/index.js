@@ -85,111 +85,54 @@ module.exports = class extends Generator {
             ]);
         }
 
-    writing_service_account() {
-
+    writing_pipeline_files() {
         this.fs.copyTpl(
             this.templatePath('./pipeline/ServiceAccount.yaml'),
-            this.destinationPath(`openshift/pipeline/${this.answers.namespace}-ServiceAccount.yaml`),
+            this.destinationPath(`openshift/pipeline/${this.answers.applicationname}-ServiceAccount.yaml`),
             {
                 serviceaccountname: this.answers.serviceaccountname,
                 namespace: this.answers.namespace,
                 ssh_secret_name: this.answers.ssh_secret_name
             });
 
-
-        //const sa = require('./templates/pipeline/serviceaccount.yaml');
-        //sa.name = this.answers.name;
-        //sa.namespace = this.answers.namespace;
-
-        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
-
-   }
-
-    writing_bitbucket_ssh_secret() {
         this.fs.copyTpl(
             this.templatePath('./pipeline/bitbucket-ssh-Secret.yaml'),
-            this.destinationPath(`openshift/pipeline/${this.answers.namespace}-git-ssh-Secret.yaml`),
+            this.destinationPath(`openshift/pipeline/${this.answers.applicationname}-git-ssh-Secret.yaml`),
             {
                 ssh_secret_name: this.answers.ssh_secret_name,
                 namespace: this.answers.namespace,
                 base64encoded_private_key: this.answers.base64encoded_private_key
             });
 
-
-        //const sa = require('./templates/pipeline/serviceaccount.yaml');
-        //sa.name = this.answers.name;
-        //sa.namespace = this.answers.namespace;
-
-        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
-        
-    }
-
-    writing_create_settings_xml_script() {
         this.fs.copyTpl(
             this.templatePath('./pipeline/create-settings-xml-secret.sh'),
-            this.destinationPath(`openshift/pipeline/${this.answers.namespace}-create-settings-xml-Script.sh`),
+            this.destinationPath(`openshift/pipeline/${this.answers.applicationname}-create-settings-xml-Script.sh`),
             {
                 namespace: this.answers.namespace,
             });
 
-
-        //const sa = require('./templates/pipeline/serviceaccount.yaml');
-        //sa.name = this.answers.name;
-        //sa.namespace = this.answers.namespace;
-
-        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
-
-    }
-
-    writing_granting_imagebuilding_access_to_service_account_script() {
         this.fs.copyTpl(
             this.templatePath('./pipeline/grant-access-to-service-account.sh'),
-            this.destinationPath(`openshift/pipeline/${this.answers.namespace}-grant-access-to-service-account-Script.sh`),
+            this.destinationPath(`openshift/pipeline/${this.answers.applicationname}-grant-access-to-service-account-Script.sh`),
             {
                 serviceaccountname: this.answers.serviceaccountname,
             });
 
-
-        //const sa = require('./templates/pipeline/serviceaccount.yaml');
-        //sa.name = this.answers.name;
-        //sa.namespace = this.answers.namespace;
-
-        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
-
-    }
-
-    writing_create_settings_xml_file() {
         this.fs.copyTpl(
             this.templatePath('./pipeline/settings.xml'),
-            this.destinationPath(`openshift/pipeline/${this.answers.namespace}-settings.xml`),
+            this.destinationPath(`openshift/pipeline/${this.answers.applicationname}-settings.xml`),
             {
                 jenkins_username: this.answers.jenkins_username,
                 jenkins_password: this.answers.jenkins_password,
                 sonar_access_token: this.answers.sonar_access_token
             });
 
-
-        //const sa = require('./templates/pipeline/serviceaccount.yaml');
-        //sa.name = this.answers.name;
-        //sa.namespace = this.answers.namespace;
-
-        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
-    }
-
-    writing_docker_config_json_file() {
         this.fs.copyTpl(
             this.templatePath('./pipeline/registry-config.json'),
-            this.destinationPath(`openshift/pipeline/${this.answers.namespace}-registry-config.json`)
+            this.destinationPath(`openshift/pipeline/${this.answers.applicationname}-registry-config.json`)
         );
-
-
-        //const sa = require('./templates/pipeline/serviceaccount.yaml');
-        //sa.name = this.answers.name;
-        //sa.namespace = this.answers.namespace;
-
-        //this.yaml.writeYamlFile(this.destinationPath('serviceaccount.yaml'), sa);
-
     }
+
 
     writing_trigger_files() {
         this.fs.copyTpl(
