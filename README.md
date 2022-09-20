@@ -17,3 +17,7 @@
 4. npm install yeoman-generator
 5. npm link (for å kunne kalle yeoman generatoren din)
 6. $ yo openshift
+
+input på git ssh, til bruk i pipelinerun for manuell start
+trigger vil ellers provide url
+
